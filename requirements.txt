@@ -1,3 +1,6 @@
 
 # No extra dependencies required for simple handler
 gTTS
+
+ffmpeg-python
+Pillow
