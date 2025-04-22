@@ -1,0 +1,2 @@
+
+# No extra dependencies required for simple handler
