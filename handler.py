@@ -59,7 +59,7 @@ def handler(event):
             audio_bitrate="192k",
             i=temp_mp3.name,
         ).overwrite_output().run()
-
+return {"video_base64": encoded_video}
 # ✅ 파일 경로만 반환하고, 삭제는 하지 않습니다!
 return {
     "file_path": temp_mp4.name
