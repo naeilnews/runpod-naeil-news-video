@@ -1,30 +1,5 @@
-# trigger rebuild
-from runpod.serverless.modules.rp_logging import RunPodLogger
-import base64
-from gtts import gTTS
-import tempfile
-import os
+# handler.py - 영상(mp4) 생성 + base64 반환
 
-def handler(event):
-    try:
-        prompt = event['input']['prompt']
-
-        # 텍스트 → mp3 변환
-        tts = gTTS(prompt, lang='ko')
-        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
-        tts.save(temp_file.name)
-
-        # mp3를 base64로 인코딩해서 반환
-        with open(temp_file.name, "rb") as f:
-            audio_data = f.read()
-            encoded_audio = base64.b64encode(audio_data).decode("utf-8")
-
-        os.unlink(temp_file.name)
-        return {"audio_base64": encoded_audio}
-
-    except Exception as e:
-        RunPodLogger.error(str(e))
-        return {"error": str(e)}
 from runpod.serverless.modules.rp_logging import RunPodLogger
 import base64
 import tempfile
@@ -35,17 +10,14 @@ import ffmpeg
 
 def handler(event):
     try:
-        return {
-    "video_base64": encoded_video
-}
-     prompt = event['input']['prompt']
+        prompt = event['input']['prompt']
 
         # 🗣️ 1. 텍스트 → 음성(mp3)
         tts = gTTS(prompt, lang='ko')
         temp_mp3 = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
         tts.save(temp_mp3.name)
 
-        # 🖼️ 2. 임시 이미지 생성 (배경용, 정적)
+        # 🖼️ 2. 임시 이미지 생성
         temp_img = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
         image = Image.new('RGB', (1280, 720), color=(30, 30, 30))
         image.save(temp_img.name)
@@ -63,9 +35,19 @@ def handler(event):
             i=temp_mp3.name,
         ).overwrite_output().run()
 
-# ✅ 파일 경로만 반환하고, 삭제는 하지 않습니다!
-return {
-    "file_path": temp_mp4.name
+        # 📦 4. base64 인코딩
+        with open(temp_mp4.name, "rb") as f:
+            video_data = f.read()
+            encoded_video = base64.b64encode(video_data).decode("utf-8")
+
+        # 🧹 5. 임시파일 삭제
+        os.unlink(temp_mp3.name)
+        os.unlink(temp_img.name)
+        os.unlink(temp_mp4.name)
+
+        return {
+            "video_base64": encoded_video
+        }
 
     except Exception as e:
         RunPodLogger.error(str(e))
