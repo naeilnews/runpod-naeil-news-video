@@ -60,17 +60,9 @@ def handler(event):
             i=temp_mp3.name,
         ).overwrite_output().run()
 
-        # 📦 4. mp4 파일을 base64로 인코딩
-        with open(temp_mp4.name, "rb") as f:
-            video_data = f.read()
-            encoded_video = base64.b64encode(video_data).decode("utf-8")
-
-        # 🧹 정리
-        os.unlink(temp_mp3.name)
-        os.unlink(temp_img.name)
-        os.unlink(temp_mp4.name)
-
-        return {"video_base64": encoded_video}
+# ✅ 파일 경로만 반환하고, 삭제는 하지 않습니다!
+return {
+    "file_path": temp_mp4.name
 
     except Exception as e:
         RunPodLogger.error(str(e))
